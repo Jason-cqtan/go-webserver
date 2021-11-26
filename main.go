@@ -26,6 +26,6 @@ func SignUp(c *web.Context) {
 
 func main() {
 	server := web.NewServer("openresty")
-	server.Route("/signup",SignUp)
+	server.Route("POST","/signup",SignUp)
 	server.Start(":8099")
 }
