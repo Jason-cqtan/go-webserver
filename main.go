@@ -37,12 +37,19 @@ func SignUp(w http.ResponseWriter,r *http.Request) {
 	c := &Context{w,r}
 	err := c.ReadJson(req)
 	if err != nil {
-		fmt.Fprintf(w,"error:%v",err)
+		c.WriteJson(http.StatusInternalServerError,&commonResponse{
+			BizCode: 4,
+			Msg: fmt.Sprintf("error:%v",err),
+		})
 		return
 	}
 
 	// 假设返回正确id
-	fmt.Fprintf(w,"id:%d",1)
+	c.WriteJson(http.StatusOK,&commonResponse{
+		BizCode: 1,
+		Msg: "success",
+		Data: 1,
+	})
 
 }
 
@@ -60,6 +67,27 @@ func (c *Context) ReadJson(data interface{}) error {
 	return json.Unmarshal(body,data)
 }
 
+// WriteJson 返回json和响应封装
+func (c *Context) WriteJson(code int,data interface{}) error {
+	bs, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	_, err = c.W.Write(bs)
+	if err != nil {
+		return err
+	}
+	c.W.Header().Set("Content-type:application/json","charset=utf-8")
+	c.W.WriteHeader(code)
+	return nil
+}
+
+// 响应json格式
+type commonResponse struct {
+	BizCode int
+	Msg string
+	Data interface{}
+}
 
 func main() {
 	server := &sdkHttpServer{
