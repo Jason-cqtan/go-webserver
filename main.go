@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	web "github.com/Jason-cqtan/webserver/lib"
-	"net/http"
 
 )
 
@@ -13,9 +12,8 @@ type signUpReq struct {
 	confirmedPassword string `json:"confirmed_password"`
 }
 
-func SignUp(w http.ResponseWriter,r *http.Request) {
+func SignUp(c *web.Context) {
 	req := &signUpReq{}
-	c := web.NewContext(w,r)
 	err := c.ReadJson(req)
 	if err != nil {
 		c.SysErrJson(&commonResponse{
