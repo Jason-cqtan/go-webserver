@@ -37,7 +37,7 @@ func SignUp(w http.ResponseWriter,r *http.Request) {
 	c := &Context{w,r}
 	err := c.ReadJson(req)
 	if err != nil {
-		c.WriteJson(http.StatusInternalServerError,&commonResponse{
+		c.SysErrJson(&commonResponse{
 			BizCode: 4,
 			Msg: fmt.Sprintf("error:%v",err),
 		})
@@ -45,7 +45,7 @@ func SignUp(w http.ResponseWriter,r *http.Request) {
 	}
 
 	// 假设返回正确id
-	c.WriteJson(http.StatusOK,&commonResponse{
+	c.OkJson(&commonResponse{
 		BizCode: 1,
 		Msg: "success",
 		Data: 1,
@@ -80,6 +80,19 @@ func (c *Context) WriteJson(code int,data interface{}) error {
 	c.W.Header().Set("Content-type:application/json","charset=utf-8")
 	c.W.WriteHeader(code)
 	return nil
+}
+
+// OkJson 辅助返回
+func (c *Context) OkJson(data interface{}) error {
+	return c.WriteJson(http.StatusOK,data)
+}
+
+func (c *Context) SysErrJson(data interface{}) error {
+	return c.WriteJson(http.StatusInternalServerError,data)
+}
+
+func (c *Context) BadRequestJson(data interface{}) error {
+	return c.WriteJson(http.StatusBadRequest,data)
 }
 
 // 响应json格式
