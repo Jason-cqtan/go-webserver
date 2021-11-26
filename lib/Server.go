@@ -5,17 +5,24 @@ import (
 	"net/http"
 )
 
-type Server interface {
+type Routable interface {
 	Route(method string,pattern string,handlerFunc func(c *Context))
+}
+
+// 组合 Routable
+type Server interface {
+	Routable
 	Start(addr string) error
 }
 
-//var Handler = make(map[string]func(c *Context))
-
+type Handler interface {
+	http.Handler
+	Routable
+}
 
 type sdkHttpServer struct {
 	Name string
-	handler *HandleBaseOnMap
+	handler Handler
 }
 
 // 响应json格式
@@ -24,6 +31,7 @@ type commonResponse struct {
 	Msg string
 	Data interface{}
 }
+
 
 // ["":""]
 type HandleBaseOnMap struct {
@@ -35,9 +43,7 @@ func (h *HandleBaseOnMap) key(method string,path string) string {
 }
 
 func (h *HandleBaseOnMap) ServeHTTP(w http.ResponseWriter,r *http.Request)  {
-	fmt.Printf("%d",11)
 	k := h.key(r.Method,r.URL.Path)
-	fmt.Printf("matched k:%s\n",k)
 	if handler,ok := h.handlers[k];ok {
 		handler(NewContext(w,r))
 	} else {
