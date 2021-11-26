@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -35,26 +34,30 @@ type signUpReq struct {
 
 func SignUp(w http.ResponseWriter,r *http.Request) {
 	req := &signUpReq{}
-	body,err := io.ReadAll(r.Body)
+	c := &Context{w,r}
+	err := c.ReadJson(req)
 	if err != nil {
-		fmt.Fprintf(w,"read body fail:%v",err)
-		return
-	}
-	err = json.Unmarshal(body,req)
-	fmt.Println(err)
-	if err != nil {
-		log.Printf("error decoding sakura response: %v", err)
-		if e, ok := err.(*json.SyntaxError); ok {
-			log.Printf("syntax error at byte offset %d", e.Offset)
-		}
-		log.Printf("sakura response: %q", body)
-		fmt.Fprintf(w,"error decoding sakura response:%v",err)
+		fmt.Fprintf(w,"error:%v",err)
 		return
 	}
 
 	// 假设返回正确id
 	fmt.Fprintf(w,"id:%d",1)
 
+}
+
+type Context struct {
+	W http.ResponseWriter
+	R *http.Request
+}
+
+// ReadJson 读取body数据
+func (c *Context) ReadJson(data interface{}) error {
+	body,err := io.ReadAll(c.R.Body)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(body,data)
 }
 
 
