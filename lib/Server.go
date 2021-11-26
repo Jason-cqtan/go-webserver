@@ -23,10 +23,7 @@ type commonResponse struct {
 
 func (s *sdkHttpServer) Route(pattern string,handlerFunc func(c *Context)) {
 	http.HandleFunc(pattern, func(writer http.ResponseWriter, request *http.Request) {
-		handlerFunc(&Context{
-			W: writer,
-			R: request,
-		})
+		handlerFunc(NewContext(writer,request))
 	})
 }
 
